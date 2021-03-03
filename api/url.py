@@ -1,5 +1,6 @@
 from data import mongo
 from fastapi import APIRouter
+from fastapi.responses import RedirectResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 
 router = APIRouter()
@@ -18,5 +19,7 @@ def shutdown_event():
 
 
 @router.get('/{url_id}')
-def get_url(url_id: str):
-    pass
+async def get_url(url_id: str):
+    collection = router.db.links
+    result = await mongo.get_url(collection, url_id)
+    return RedirectResponse(result["url"])
