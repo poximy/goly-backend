@@ -15,3 +15,8 @@ async def startup_event():
 @router.on_event("shutdown")
 def shutdown_event():
     router.client.close()
+
+
+@router.get('/{url_id}')
+def get_url(url_id: str):
+    pass
