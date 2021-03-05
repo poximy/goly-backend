@@ -1,4 +1,13 @@
 import aiofiles
+import random
+
+
+def url_id_gen(length: int = 6):
+    base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    url_id = ''
+    for _ in range(length):
+        url_id += random.choice(base)
+    return url_id
 
 
 async def get_uri():
