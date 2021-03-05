@@ -8,8 +8,8 @@ router = APIRouter()
 
 @router.on_event("startup")
 async def startup_event():
-    URI = await mongo.get_uri()
-    router.client = AsyncIOMotorClient(URI)
+    uri = await mongo.get_uri()
+    router.client = AsyncIOMotorClient(uri)
     router.db = router.client.url
 
 
