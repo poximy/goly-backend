@@ -1,5 +1,6 @@
-import aiofiles
 import random
+
+import aiofiles
 
 
 def url_id_gen(length: int = 6):
