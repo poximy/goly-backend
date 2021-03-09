@@ -3,7 +3,7 @@ import random
 import aiofiles
 
 
-def url_id_gen(length: int = 6):
+def id_gen(length: int = 6) -> str:
     # Generates a Base62 id
     base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     url_id = ''
