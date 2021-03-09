@@ -12,6 +12,15 @@ def id_gen(length: int = 6) -> str:
     return url_id
 
 
+async def url_id_gen(collection) -> str:
+    # Generates a valid url id that isn't in the DB
+    while True:
+        url_id = id_gen()
+        available = await get_url(collection, url_id)
+        if available is None:
+            return url_id
+
+
 async def get_uri():
     # Finds the uri key and returns a readable string
     async with aiofiles.open("uri.txt", mode='r', encoding='utf-8') as file:
