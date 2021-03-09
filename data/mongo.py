@@ -2,6 +2,8 @@ import random
 
 import aiofiles
 
+from . import models
+
 
 def id_gen(length: int = 6) -> str:
     # Generates a Base62 id
@@ -33,3 +35,15 @@ async def get_url(collection, url_id) -> dict:
     find = {'_id': url_id}
     result: dict = await collection.find_one(find)
     return result
+
+
+async def post_url(collection, url: str) -> models.Url:
+    if used := await collection.find_one({'url': url}):
+        # Checks if the url is not in use
+        # True if the there is data False otherwise
+        return models.Url(**used)
+    # Creates a new id and saves it to the DB
+    url_id = await url_id_gen(collection)
+    url_data = {'_id': url_id, 'url': url}
+    await collection.insert_one(url_data)
+    return models.Url(**url_data)
