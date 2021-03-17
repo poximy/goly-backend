@@ -25,8 +25,8 @@ async def get_url(url_id: str):
     return RedirectResponse(result["url"])
 
 
-@router.post('/{url}', response_model=models.Url)
-async def post_url(url: str):
+@router.post('/{url_data}', response_model=models.Url)
+async def post_url(url_data: str):
     collection = router.db.links
-    result: models.Url = await mongo.post_url(collection, url)
+    result: models.Url = await mongo.post_url(collection, url_data)
     return result
