@@ -5,19 +5,11 @@ import aiofiles
 from . import models
 
 
-def id_gen(length: int = 6) -> str:
-    # Generates a Base62 id
+async def url_id_gen(collection, length: int = 6) -> str:
+    # Generates a valid Base62 url id that isn't in the DB
     base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    url_id = ''
-    for _ in range(length):
-        url_id += random.choice(base)
-    return url_id
-
-
-async def url_id_gen(collection) -> str:
-    # Generates a valid url id that isn't in the DB
     while True:
-        url_id = id_gen()
+        url_id = ''.join(random.choices(base, k=length))
         available = await get_url(collection, url_id)
         if available is None:
             return url_id
