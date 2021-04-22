@@ -1,5 +1,6 @@
 import aiofiles
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -10,6 +11,12 @@ app = FastAPI()
 app.include_router(url.router)
 app.mount("/static", StaticFiles(directory="../url-shortener-frontend/build/static"), name="static")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8000"],
+    allow_methods=["OPTIONS", "POST", "GET"],
+    allow_headers=["*"],
+)
 
 
 @app.get('/', include_in_schema=False, response_class=HTMLResponse)
