@@ -17,9 +17,19 @@ async def url_id_gen(collection, length: int = 6) -> str:
 
 async def get_uri():
     # Finds the uri key and returns a readable string
-    async with aiofiles.open("uri.txt", mode='r', encoding='utf-8') as file:
-        uri = await file.readline()
-        return uri.rstrip("\n")
+    try:
+        async with aiofiles.open("uri.txt", mode='r', encoding='utf-8') as file:
+            uri = await file.readline()
+            uri_text = uri.rstrip("\n")
+            if uri_text == "":
+                raise ValueError("File should contain a URI")
+            return uri_text
+    except (FileNotFoundError, ValueError) as err:
+        if isinstance(err, ValueError):
+            print(err)
+        else:
+            print(f"No file with the name: {err.filename}")
+            print("Create a uri.txt file with a MongoDB URI")
 
 
 async def get_url(collection, url_id) -> dict:
