@@ -21,15 +21,14 @@ async def get_uri():
         async with aiofiles.open("uri.txt", mode='r', encoding='utf-8') as file:
             uri = await file.readline()
             uri_text = uri.rstrip("\n")
-            if uri_text == "":
+            if uri_text == "" or not uri_text.startswith("mongodb+srv://"):
                 raise ValueError("File should contain a URI")
             return uri_text
-    except (FileNotFoundError, ValueError) as err:
-        if isinstance(err, ValueError):
-            print(err)
-        else:
-            print(f"No file with the name: {err.filename}")
-            print("Create a uri.txt file with a MongoDB URI")
+    except FileNotFoundError as err:
+        print(f"No file with the name: {err.filename}")
+        print("Create a uri.txt file with a MongoDB URI")
+    except ValueError as err:
+        print(err)
 
 
 async def get_url(collection, url_id) -> dict:
