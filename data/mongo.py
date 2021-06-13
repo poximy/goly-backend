@@ -5,7 +5,7 @@ import aiofiles
 from . import models
 
 
-async def url_id_gen(collection, length: int = 6) -> str:
+async def url_id_gen(collection, length: int = 6):
     # Generates a valid Base62 url id that isn't in the DB
     base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     while True:
@@ -31,14 +31,14 @@ async def get_uri():
         print(err)
 
 
-async def get_url(collection, url_id) -> dict:
+async def get_url(collection, url_id):
     # Looks up the url id from the DB, if found return the url
     find = {'_id': url_id}
     result: dict = await collection.find_one(find)
     return result
 
 
-async def post_url(collection, url: str) -> models.Url:
+async def post_url(collection, url: str):
     if used := await collection.find_one({'url': url}):
         # Checks if the url is not in use
         # True if the there is data False otherwise
