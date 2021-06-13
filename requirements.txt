@@ -1,3 +1,2 @@
-fastapi[all]==0.63.0
-motor==2.3.1
-
+fastapi[all]>=0.65.2
+motor>=2.4.0
