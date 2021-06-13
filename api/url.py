@@ -1,5 +1,5 @@
 from data import models, mongo
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi.responses import RedirectResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -25,8 +25,8 @@ async def get_url(url_id: str):
     return RedirectResponse(result["url"])
 
 
-@router.post('/', response_model=models.Url)
-async def post_url(url_data: models.Url):
+@router.post('/', response_model=models.Url_ID)
+async def post_url(url: str = Body(..., embed=True)):
     collection = router.db.links
-    result: models.Url = await mongo.post_url(collection, url_data.url)
+    result = await mongo.post_url(collection, url)
     return result
