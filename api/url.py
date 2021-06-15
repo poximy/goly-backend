@@ -1,5 +1,5 @@
 from data import models, mongo
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import RedirectResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -22,7 +22,10 @@ def shutdown_event():
 async def get_url(url_id: str):
     collection = router.db.links
     result = await mongo.get_url(collection, url_id)
-    return RedirectResponse(result["url"])
+    if result:
+        return RedirectResponse(result["url"])
+    detail = {"error": f"{url_id} does not exist"}
+    raise HTTPException(status_code=404, detail=detail)
 
 
 @router.post('/', response_model=models.Url_ID)
