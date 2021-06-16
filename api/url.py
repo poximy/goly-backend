@@ -18,7 +18,7 @@ def shutdown_event():
     router.client.close()
 
 
-@router.get('/{url_id}')
+@router.get('/{url_id}', status_code=301)
 async def get_url(url_id: str):
     collection = router.db.links
     result = await mongo.get_url(collection, url_id)
@@ -28,7 +28,7 @@ async def get_url(url_id: str):
     raise HTTPException(status_code=404, detail=detail)
 
 
-@router.post('/', response_model=models.Url_ID)
+@router.post('/', response_model=models.Url_ID, status_code=201)
 async def post_url(url: str = Body(..., embed=True)):
     collection = router.db.links
     result = await mongo.post_url(collection, url)
