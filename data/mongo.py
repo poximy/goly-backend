@@ -1,5 +1,6 @@
+import asyncio
 import random
-from typing import List
+from typing import List, Tuple
 
 import aiofiles
 
@@ -59,3 +60,12 @@ async def get_user_urls(collection, user_name):
             url = models.Url_ID(_id=url_id)
             url_ids.append(url)
     return url_ids
+
+
+async def get_metadata(collection, url_ids: List[models.Url_ID]):
+    url_metadata = []
+    for url_id in url_ids:
+        url = collection.find_one({"_id": url_id.id})
+        url_metadata.append(url)
+    values: Tuple[dict] = await asyncio.gather(*url_metadata)
+    return [models.Url_Metadata(**value) for value in values]
