@@ -1,4 +1,5 @@
 import random
+from typing import List
 
 import aiofiles
 
@@ -48,3 +49,13 @@ async def post_url(collection, url: str):
     url_data = {'_id': url_id, 'url': url}
     await collection.insert_one(url_data)
     return models.Url_ID(_id=url_data["_id"])
+
+
+async def get_user_urls(collection, user_name):
+    user_data = await collection.find_one({"user_name": user_name})
+    url_ids: List[models.Url_ID] = []
+    if user_data is not None:
+        for url_id in user_data["urls"]:
+            url = models.Url_ID(_id=url_id)
+            url_ids.append(url)
+    return url_ids
