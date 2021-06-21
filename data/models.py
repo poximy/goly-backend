@@ -3,17 +3,17 @@ from typing import Set
 from pydantic import BaseModel, Field
 
 
-class Url_ID(BaseModel):
+class UrlID(BaseModel):
     id: str = Field(alias='_id')
 
 
 class User(BaseModel):
     user_name: str
     password: str
-    urls: Set[Url_ID]
+    urls: Set[UrlID]
 
 
-class Url_Metadata(BaseModel):
+class UrlMetadata(BaseModel):
     id: str = Field(alias="_id")
     created: str
     clicks: int

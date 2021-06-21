@@ -44,28 +44,28 @@ async def post_url(collection, url: str):
     if used := await collection.find_one({'url': url}):
         # Checks if the url is not in use
         # True if the there is data False otherwise
-        return models.Url_ID(_id=used["_id"])
+        return models.UrlID(_id=used["_id"])
     # Creates a new id and saves it to the DB
     url_id = await url_id_gen(collection)
     url_data = {'_id': url_id, 'url': url}
     await collection.insert_one(url_data)
-    return models.Url_ID(_id=url_data["_id"])
+    return models.UrlID(_id=url_data["_id"])
 
 
 async def get_user_urls(collection, user_name):
     user_data = await collection.find_one({"user_name": user_name})
-    url_ids: List[models.Url_ID] = []
+    url_ids: List[models.UrlID] = []
     if user_data is not None:
         for url_id in user_data["urls"]:
-            url = models.Url_ID(_id=url_id)
+            url = models.UrlID(_id=url_id)
             url_ids.append(url)
     return url_ids
 
 
-async def get_metadata(collection, url_ids: List[models.Url_ID]):
+async def get_metadata(collection, url_ids: List[models.UrlID]):
     url_metadata = []
     for url_id in url_ids:
         url = collection.find_one({"_id": url_id.id})
         url_metadata.append(url)
     values: Tuple[dict] = await asyncio.gather(*url_metadata)
-    return [models.Url_Metadata(**value) for value in values]
+    return [models.UrlMetadata(**value) for value in values]

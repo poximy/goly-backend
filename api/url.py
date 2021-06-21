@@ -28,7 +28,7 @@ async def get_url(url_id: str):
     raise HTTPException(status_code=404, detail=detail)
 
 
-@router.post('/', response_model=models.Url_ID, status_code=201)
+@router.post('/', response_model=models.UrlID, status_code=201)
 async def post_url(url: str = Body(..., embed=True)):
     collection = router.db.links
     result = await mongo.post_url(collection, url)
