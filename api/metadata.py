@@ -19,7 +19,7 @@ def shutdown_event():
     router.client.close()
 
 
-@router.get("/user/{user_name}", response_model=List[models.Url_Metadata])
+@router.get("/user/{user_name}", response_model=List[models.UrlMetadata])
 async def metadata(user_name: str):
     user_urls = await mongo.get_user_urls(router.db.user, user_name)
     data = await mongo.get_metadata(router.db.metadata, user_urls)
