@@ -3,8 +3,18 @@ import random
 from typing import List, Tuple
 
 import aiofiles
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from . import models
+
+
+class UrlDB:
+    def __init__(self, uri) -> None:
+        self.client = AsyncIOMotorClient(uri)
+        self.db = self.client.url
+
+    def close(self) -> None:
+        self.client.close()
 
 
 async def url_id_gen(collection, length: int = 6):
