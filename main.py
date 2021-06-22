@@ -19,6 +19,7 @@ app.add_middleware(
 
 @app.middleware("http")
 async def database(request: Request, call_next):
+    # Passes the database via request.state
     request.state.db = DB
     response = await call_next(request)
     return response
