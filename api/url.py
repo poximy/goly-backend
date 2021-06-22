@@ -1,27 +1,15 @@
-from data import models, mongo
-from fastapi import APIRouter, HTTPException, Body
+from data import models
+from data.mongo import UrlDB
+from fastapi import APIRouter, Body, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from motor.motor_asyncio import AsyncIOMotorClient
 
 router = APIRouter()
 
 
-@router.on_event("startup")
-async def startup_event():
-    uri = await mongo.get_uri()
-    router.client = AsyncIOMotorClient(uri)
-    router.db = router.client.url
-
-
-@router.on_event("shutdown")
-def shutdown_event():
-    router.client.close()
-
-
 @router.get('/{url_id}', status_code=301)
-async def get_url(url_id: str):
-    collection = router.db.links
-    result = await mongo.get_url(collection, url_id)
+async def get_url(request: Request, url_id: str):
+    database: UrlDB = request.state.db
+    result = await database.get_url("links", url_id)
     if result:
         return RedirectResponse(result["url"])
     detail = {"error": f"{url_id} does not exist"}
@@ -29,7 +17,7 @@ async def get_url(url_id: str):
 
 
 @router.post('/', response_model=models.UrlID, status_code=201)
-async def post_url(url: str = Body(..., embed=True)):
-    collection = router.db.links
-    result = await mongo.post_url(collection, url)
+async def post_url(request: Request, url: str = Body(..., embed=True)):
+    database: UrlDB = request.state.db
+    result = await database.post_url("links", url)
     return result

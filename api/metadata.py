@@ -1,26 +1,15 @@
 from typing import List
 
-from data import models, mongo
-from fastapi import APIRouter
-from motor.motor_asyncio import AsyncIOMotorClient
+from data import models
+from data.mongo import UrlDB
+from fastapi import APIRouter, Request
 
 router = APIRouter()
 
 
-@router.on_event("startup")
-async def startup_event():
-    uri = await mongo.get_uri()
-    router.client = AsyncIOMotorClient(uri)
-    router.db = router.client.url
-
-
-@router.on_event("shutdown")
-def shutdown_event():
-    router.client.close()
-
-
 @router.get("/user/{user_name}", response_model=List[models.UrlMetadata])
-async def metadata(user_name: str):
-    user_urls = await mongo.get_user_urls(router.db.user, user_name)
-    data = await mongo.get_metadata(router.db.metadata, user_urls)
+async def metadata(request: Request, user_name: str):
+    database: UrlDB = request.state.db
+    user_urls = await database.get_user_urls("user", user_name)
+    data = await database.get_metadata("metadata", user_urls)
     return data

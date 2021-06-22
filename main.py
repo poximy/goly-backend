@@ -1,12 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import metadata, url
+from data import mongo, settings
 
 app = FastAPI()
 
-app.include_router(metadata.router)
-app.include_router(url.router)
+config = settings.Settings()
+DB = mongo.UrlDB(config.mongo_uri)
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,3 +15,19 @@ app.add_middleware(
     allow_methods=["OPTIONS", "POST", "GET"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def database(request: Request, call_next):
+    request.state.db = DB
+    response = await call_next(request)
+    return response
+
+
+app.include_router(url.router)
+app.include_router(metadata.router)
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    DB.close()
