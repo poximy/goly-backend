@@ -4,7 +4,9 @@ from data import models
 from data.mongo import UrlDB
 from fastapi import APIRouter, Request
 
-router = APIRouter()
+router = APIRouter(
+    tags=["metadata"]
+)
 
 
 @router.get("/user/{user_name}", response_model=List[models.UrlMetadata])

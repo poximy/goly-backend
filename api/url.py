@@ -3,7 +3,9 @@ from data.mongo import UrlDB
 from fastapi import APIRouter, Body, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
-router = APIRouter()
+router = APIRouter(
+    tags=["url"]
+)
 
 
 @router.get('/{url_id}', status_code=301)
