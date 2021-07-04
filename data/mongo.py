@@ -3,6 +3,7 @@ import random
 from typing import List, Tuple
 
 from motor.motor_asyncio import AsyncIOMotorClient
+from passlib.hash import bcrypt
 
 from . import models
 
@@ -59,3 +60,29 @@ class UrlDB:
             url_metadata.append(url)
         values: Tuple[dict] = await asyncio.gather(*url_metadata)
         return [models.UrlMetadata(**value) for value in values]
+
+    async def user_exists(self, collection: str, user_name: str):
+        find = {"user_name": user_name}
+        user = await self.db[collection].find_one(find)
+        return True if user else False
+
+    async def create_user(self, collection: str, user: models.User):
+        exists = await self.user_exists(collection, user.user_name)
+
+        if not exists:
+            await self.db[collection].insert_one({
+                "user_name": user.user_name,
+                "password": bcrypt.hash(user.password),
+                "urls": []
+            })
+            return True
+        return False
+
+    async def user_login(self, collection: str, user: models.User):
+        exists = await self.user_exists(collection, user.user_name)
+
+        if exists:
+            find_data = {"user_name": user.user_name}
+            data = await self.db[collection].find_one(find_data)
+            verify = bcrypt.verify(user.password, data["password"])
+            return verify

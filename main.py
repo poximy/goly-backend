@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import metadata, url
+from api import metadata, url, auth, user
 from data import mongo, settings
 
 app = FastAPI()
@@ -26,6 +26,8 @@ async def database(request: Request, call_next):
 
 
 app.include_router(url.router)
+app.include_router(auth.router)
+app.include_router(user.router)
 app.include_router(metadata.router)
 
 

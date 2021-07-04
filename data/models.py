@@ -10,7 +10,7 @@ class UrlID(BaseModel):
 class User(BaseModel):
     user_name: str
     password: str
-    urls: Set[UrlID]
+    urls: Set[UrlID] = set()
 
 
 class UrlMetadata(BaseModel):
