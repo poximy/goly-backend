@@ -2,7 +2,7 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Enviorment variables
+    # Environment variables
     mongo_uri: str = "MONGO_URI"
 
     class Config:
