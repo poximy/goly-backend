@@ -17,7 +17,7 @@ async def token_gen(request: Request,
     valid = await database.user_login("user", user)
     if valid:
         token_data = {"user": form_data.username}
-        token = jwt.encode(token_data, "JWT_SECRET")
+        token = jwt.encode(token_data, request.state.jwt)
         return {"access_token": token}
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

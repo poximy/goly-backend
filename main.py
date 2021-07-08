@@ -6,8 +6,10 @@ from data import mongo, settings
 
 app = FastAPI()
 
+# values from .env file
 config = settings.Settings()
 DB = mongo.UrlDB(config.mongo_uri)
+JWT = config.jwt
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,6 +23,13 @@ app.add_middleware(
 async def database(request: Request, call_next):
     # Passes the database via request.state
     request.state.db = DB
+    response = await call_next(request)
+    return response
+
+
+@app.middleware("http")
+async def jwt(request: Request, call_next):
+    request.state.jwt = JWT
     response = await call_next(request)
     return response
 
