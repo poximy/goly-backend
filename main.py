@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import metadata, url, auth, user
+from api import auth, metadata, url, user
 from data import mongo, settings
 
 app = FastAPI()

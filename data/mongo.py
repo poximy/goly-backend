@@ -18,7 +18,7 @@ class UrlDB:
         self.client.close()
 
     async def get_url(self, collection: str, url_id: str):
-        find = {'_id': url_id}
+        find = {"_id": url_id}
         result: dict = await self.db[collection].find_one(find)
         return result
 
@@ -26,19 +26,19 @@ class UrlDB:
         # Generates a valid Base62 url id that isn't in the DB
         base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         while True:
-            url_id = ''.join(random.choices(base, k=length))
+            url_id = "".join(random.choices(base, k=length))
             available = await self.get_url(collection, url_id)
             if available is None:
                 return url_id
 
     async def post_url(self, collection: str, url: str):
-        if used := await self.db[collection].find_one({'url': url}):
+        if used := await self.db[collection].find_one({"url": url}):
             # Checks if the url is not in use
             # True if the there is data False otherwise
             return models.UrlID(_id=used["_id"])
         # Creates a new id and saves it to the DB
         url_id = await self.id_gen(collection)
-        url_data = {'_id': url_id, 'url': url}
+        url_data = {"_id": url_id, "url": url}
         await self.db[collection].insert_one(url_data)
         return models.UrlID(_id=url_data["_id"])
 
@@ -70,11 +70,13 @@ class UrlDB:
         exists = await self.user_exists(collection, user.user_name)
 
         if not exists:
-            await self.db[collection].insert_one({
-                "user_name": user.user_name,
-                "password": bcrypt.hash(user.password),
-                "urls": []
-            })
+            await self.db[collection].insert_one(
+                {
+                    "user_name": user.user_name,
+                    "password": bcrypt.hash(user.password),
+                    "urls": [],
+                }
+            )
             return True
         return False
 

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class UrlID(BaseModel):
-    id: str = Field(alias='_id')
+    id: str = Field(alias="_id")
 
 
 class User(BaseModel):

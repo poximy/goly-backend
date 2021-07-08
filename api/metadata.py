@@ -6,9 +6,7 @@ from data.mongo import UrlDB
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
-router = APIRouter(
-    tags=["metadata"]
-)
+router = APIRouter(tags=["metadata"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
