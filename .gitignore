@@ -5,6 +5,7 @@ venv/
 # Files
 __init__.py
 *.py[cod]
+.DS_Store
 
 # Enviorment variables
 .env
