@@ -1,0 +1,4 @@
+-r common.txt
+
+flake8>=3.9.2
+black>=21.6b0
