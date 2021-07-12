@@ -12,8 +12,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.get("/user/{user_name}", response_model=List[models.UrlMetadata])
-async def metadata(request: Request, user_name: str,
-                   token: str = Depends(oauth2_scheme)):
+async def metadata(
+    request: Request, user_name: str, token: str = Depends(oauth2_scheme)
+):
     jwt_data = jwt.decode(token, request.state.jwt, algorithms=["HS256"])
     if user_name == jwt_data["user"]:
         database: UrlDB = request.state.db
