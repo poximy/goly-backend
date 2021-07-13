@@ -1,5 +1,5 @@
-from data import models, mongo
 from fastapi import APIRouter, Request
+from src.data import models, mongo
 
 router = APIRouter()
 

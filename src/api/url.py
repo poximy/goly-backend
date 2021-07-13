@@ -1,7 +1,7 @@
-from data import models
-from data.mongo import UrlDB
 from fastapi import APIRouter, Body, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from src.data import models
+from src.data.mongo import UrlDB
 
 router = APIRouter(tags=["url"])
 
