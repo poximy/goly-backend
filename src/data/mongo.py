@@ -9,9 +9,11 @@ from . import models
 
 
 class UrlDB:
-    def __init__(self, uri) -> None:
+    def __init__(self, uri: str, size: int = 5) -> None:
         self.client = AsyncIOMotorClient(uri)
         self.db = self.client.url
+
+        self.size = size
 
     def close(self) -> None:
         # Kills the connection with the database
@@ -22,11 +24,11 @@ class UrlDB:
         result: dict = await self.db[collection].find_one(find)
         return result
 
-    async def id_gen(self, collection: str, length: int = 6):
+    async def id_gen(self, collection: str):
         # Generates a valid Base62 url id that isn't in the DB
         base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         while True:
-            url_id = "".join(random.choices(base, k=length))
+            url_id = "".join(random.choices(base, k=self.size))
             available = await self.get_url(collection, url_id)
             if available is None:
                 return url_id
