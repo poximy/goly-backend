@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from src.data import models
 from src.data.mongo import UrlDB
@@ -7,8 +7,11 @@ router = APIRouter(tags=["url"])
 
 
 @router.get("/{url_id}", status_code=301)
-async def get_url(request: Request, url_id: str):
+async def get_url(background_tasks: BackgroundTasks, request: Request,
+                  url_id: str):
     database: UrlDB = request.state.db
+    background_tasks.add_task(database.click, "metadata", url_id)
+
     result = await database.get_url("links", url_id)
     if result:
         return RedirectResponse(result["url"])
