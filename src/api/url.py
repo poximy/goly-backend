@@ -20,7 +20,10 @@ async def get_url(background_tasks: BackgroundTasks, request: Request,
 
 
 @router.post("/", response_model=models.UrlID, status_code=201)
-async def post_url(request: Request, url: str = Body(..., embed=True)):
+async def post_url(background_tasks: BackgroundTasks, request: Request,
+                   url: str = Body(..., embed=True)):
     database: UrlDB = request.state.db
+
     result = await database.post_url("links", url)
+    background_tasks.add_task(database.add_metadata, "metadata", result)
     return result
