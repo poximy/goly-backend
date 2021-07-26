@@ -90,3 +90,10 @@ class UrlDB:
             data = await self.db[collection].find_one(find_data)
             verify = bcrypt.verify(user.password, data["password"])
             return verify
+
+    async def click(self, collection: str, url_id: str):
+        # Increments the click count
+        increment = {"$inc": {"clicks": 1}}
+        update = {"_id": url_id}
+
+        await self.db[collection].update_one(update, increment)
