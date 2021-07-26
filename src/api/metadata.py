@@ -3,6 +3,7 @@ from typing import List
 import jwt
 from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
+
 from src.data import models
 from src.data.mongo import UrlDB
 

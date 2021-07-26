@@ -1,5 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Request
 from fastapi.responses import RedirectResponse
+
 from src.data import models
 from src.data.mongo import UrlDB
 
