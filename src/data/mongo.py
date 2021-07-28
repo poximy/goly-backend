@@ -68,7 +68,7 @@ class UrlDB:
         used = await self.db[collection].find_one({"url": url_id})
         if used:
             return
-        metadata = {"_id": url_id, "created": date.today(), "clicks": 0}
+        metadata = {"_id": url_id, "created": str(date.today()), "clicks": 0}
         await self.db[collection].insert_one(metadata)
 
     async def user_exists(self, collection: str, user_name: str):
