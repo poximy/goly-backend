@@ -26,5 +26,5 @@ async def post_url(background_tasks: BackgroundTasks, request: Request,
     database: UrlDB = request.state.db
 
     result = await database.post_url("links", url)
-    background_tasks.add_task(database.add_metadata, "metadata", result)
+    background_tasks.add_task(database.add_metadata, "metadata", result.id)
     return result

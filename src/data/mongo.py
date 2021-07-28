@@ -64,11 +64,11 @@ class UrlDB:
         values: Tuple[dict] = await asyncio.gather(*url_metadata)
         return [models.UrlMetadata(**value) for value in values]
 
-    async def add_metadata(self, collection: str, url_id: models.UrlID):
-        used = await self.db[collection].find_one({"url": url_id.id})
+    async def add_metadata(self, collection: str, url_id: str):
+        used = await self.db[collection].find_one({"url": url_id})
         if used:
             return
-        metadata = {"_id": url_id.id, "created": date.today(), "clicks": 0}
+        metadata = {"_id": url_id, "created": date.today(), "clicks": 0}
         await self.db[collection].insert_one(metadata)
 
     async def user_exists(self, collection: str, user_name: str):
