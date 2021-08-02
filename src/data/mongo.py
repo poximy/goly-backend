@@ -105,3 +105,16 @@ class UrlDB:
         update = {"_id": url_id}
 
         await self.db[collection].update_one(update, increment)
+
+    async def user_url(self, collection: str, url_id: str, user: str):
+        find = {
+            "user_name": user
+        }
+
+        update = {
+            "$push": {
+                "urls": url_id
+            }
+        }
+
+        await self.db[collection].update_one(find, update)

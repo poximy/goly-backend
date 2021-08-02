@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
 from src.data import models
@@ -22,9 +22,13 @@ async def get_url(background_tasks: BackgroundTasks, request: Request,
 
 @router.post("/", response_model=models.UrlID, status_code=201)
 async def post_url(background_tasks: BackgroundTasks, request: Request,
-                   url: str = Body(..., embed=True)):
+                   body: models.UrlPOST):
     database: UrlDB = request.state.db
 
-    result = await database.post_url("links", url)
+    result = await database.post_url("links", body.url)
+
     background_tasks.add_task(database.add_metadata, "metadata", result.id)
+    if body.user is not None:
+        background_tasks.add_task(database.user_url, "user", result.id,
+                                  body.user)
     return result

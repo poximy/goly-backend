@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Optional, Set
 
 from pydantic import BaseModel, Field
 
@@ -17,3 +17,8 @@ class UrlMetadata(BaseModel):
     id: str = Field(alias="_id")
     created: str
     clicks: int
+
+
+class UrlPOST(BaseModel):
+    url: str
+    user: Optional[str]
