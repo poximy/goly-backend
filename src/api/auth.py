@@ -13,7 +13,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def token_gen(request: Request,
                     form_data: OAuth2PasswordRequestForm = Depends()):
     database: mongo.UrlDB = request.state.db
-    data = {"user_name": form_data.username, "password": form_data.password}
+
+    data = {
+        "user_name": form_data.username,
+        "password": form_data.password
+    }
+
     user = models.User(**data)
     valid = await database.user_login("user", user)
     if valid:

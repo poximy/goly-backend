@@ -41,7 +41,12 @@ class UrlDB:
             return models.UrlID(_id=used["_id"])
         # Creates a new id and saves it to the DB
         url_id = await self.id_gen(collection)
-        url_data = {"_id": url_id, "url": url}
+
+        url_data = {
+            "_id": url_id,
+            "url": url
+        }
+
         await self.db[collection].insert_one(url_data)
         return models.UrlID(_id=url_data["_id"])
 
@@ -68,7 +73,11 @@ class UrlDB:
         used = await self.db[collection].find_one({"url": url_id})
         if used:
             return
-        metadata = {"_id": url_id, "created": str(date.today()), "clicks": 0}
+        metadata = {
+            "_id": url_id,
+            "created": str(date.today()),
+            "clicks": 0
+        }
         await self.db[collection].insert_one(metadata)
 
     async def user_exists(self, collection: str, user_name: str):
@@ -101,16 +110,17 @@ class UrlDB:
 
     async def click(self, collection: str, url_id: str):
         # Increments the click count
-        increment = {"$inc": {"clicks": 1}}
         update = {"_id": url_id}
+        increment = {
+            "$inc": {
+                "clicks": 1
+            }
+        }
 
         await self.db[collection].update_one(update, increment)
 
     async def user_url(self, collection: str, url_id: str, user: str):
-        find = {
-            "user_name": user
-        }
-
+        find = {"user_name": user}
         update = {
             "$push": {
                 "urls": url_id
