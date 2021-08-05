@@ -126,3 +126,26 @@ class UrlDB:
         }
 
         await self.db[collection].update_one(find, update)
+
+
+class Database:
+    def __init__(self, uri: str):
+        self.client = AsyncIOMotorClient(uri)
+        self.db = self.client.url
+
+    def url(self, collection):
+        return self.Url(self.db[collection])
+
+    class Url:
+        def __init__(self, collection):
+            self.collection = collection
+
+        async def get(self, ID):
+            find = {"_id": ID}
+            result: dict = await self.collection.find_one(find)
+            print(result)
+            return result
+
+    def close(self) -> None:
+        # Kills the connection with the database
+        self.client.close()

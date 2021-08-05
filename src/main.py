@@ -9,6 +9,8 @@ app = FastAPI()
 # values from .env file
 config = settings.Settings()
 DB = mongo.UrlDB(config.mongo_uri)
+database = mongo.Database(config.mongo_uri)
+url_collection = database.url("links")
 JWT = config.jwt
 
 app.add_middleware(
@@ -20,9 +22,10 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def database(request: Request, call_next):
+async def collections(request: Request, call_next):
     # Passes the database via request.state
     request.state.db = DB
+    request.state.url = url_collection
     response = await call_next(request)
     return response
 
@@ -43,3 +46,4 @@ app.include_router(metadata.router)
 @app.on_event("shutdown")
 def shutdown_event():
     DB.close()
+    database.close()
