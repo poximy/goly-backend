@@ -15,7 +15,6 @@ async def get_url(background_tasks: BackgroundTasks, request: Request,
     background_tasks.add_task(database.click, "metadata", url_id)
 
     result = await url.get(url_id)
-    print(result)
     if result:
         return RedirectResponse(result["url"])
     detail = {"error": f"{url_id} does not exist"}

@@ -143,7 +143,6 @@ class Database:
         async def get(self, ID):
             find = {"_id": ID}
             result: dict = await self.collection.find_one(find)
-            print(result)
             return result
 
     def close(self) -> None:
