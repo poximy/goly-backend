@@ -67,15 +67,6 @@ class UrlDB:
             return True
         return False
 
-    async def user_login(self, collection: str, user: models.User):
-        exists = await self.user_exists(collection, user.user_name)
-
-        if exists:
-            find_data = {"user_name": user.user_name}
-            data = await self.db[collection].find_one(find_data)
-            verify = bcrypt.verify(user.password, data["password"])
-            return verify
-
     async def click(self, collection: str, url_id: str):
         # Increments the click count
         update = {"_id": url_id}
@@ -142,6 +133,24 @@ class Database:
 
             await self.collection.insert_one(url_data)
             return models.UrlID(_id=url_data["_id"])
+
+    class User:
+        def __init__(self, collection):
+            self.collection = collection
+
+        async def login(self, user: models.User):
+            exists = await self.exists(user.user_name)
+
+            if exists:
+                find_data = {"user_name": user.user_name}
+                data = await self.collection.find_one(find_data)
+                verify = bcrypt.verify(user.password, data["password"])
+                return verify
+
+        async def exists(self, user_name: str):
+            find = {"user_name": user_name}
+            user = await self.collection.find_one(find)
+            return True if user else False
 
     def close(self) -> None:
         # Kills the connection with the database
