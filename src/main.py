@@ -11,6 +11,7 @@ config = settings.Settings()
 DB = mongo.UrlDB(config.mongo_uri)
 database = mongo.Database(config.mongo_uri)
 url_collection = database.url("links")
+user_collection = database.user("user")
 JWT = config.jwt
 
 app.add_middleware(
@@ -26,6 +27,7 @@ async def collections(request: Request, call_next):
     # Passes the database via request.state
     request.state.db = DB
     request.state.url = url_collection
+    request.state.user = user_collection
     response = await call_next(request)
     return response
 

@@ -106,6 +106,9 @@ class Database:
     def url(self, collection):
         return self.Url(self.db[collection])
 
+    def user(self, collection):
+        return self.User(self.db[collection])
+
     class Url:
         def __init__(self, collection):
             self.collection = collection
