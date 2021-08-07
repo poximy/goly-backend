@@ -24,9 +24,9 @@ async def get_url(background_tasks: BackgroundTasks, request: Request,
 @router.post("/", response_model=models.UrlID, status_code=201)
 async def post_url(request: Request,
                    body: models.UrlPOST):
-    database: UrlDB = request.state.db
+    url_collection = Database.Url = request.state.url
 
-    result = await database.post_url("links", body.url)
+    result = await url_collection.post(body.url)
 
     # background_tasks.add_task(database.add_metadata, "metadata", result.id)
     # # if body.user is not None:
