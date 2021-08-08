@@ -104,14 +104,10 @@ class Database:
         def __init__(self, collection):
             self.collection = collection
 
-        async def id_gen(self, size: int = 5):
+        async def generator(self, size: int = 6):
             # Generates a valid Base62 url id that isn't in the DB
             base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            while True:
-                url_id = "".join(random.choices(base, k=size))
-                available = await self.get(url_id)
-                if available is None:
-                    return url_id
+            return "".join(random.choices(base, k=size))
 
         async def get(self, url_id: str):
             find = {"_id": url_id}
