@@ -37,17 +37,6 @@ class UrlDB:
         values: Tuple[dict] = await asyncio.gather(*url_metadata)
         return [models.UrlMetadata(**value) for value in values]
 
-    async def add_metadata(self, collection: str, url_id: str):
-        used = await self.db[collection].find_one({"url": url_id})
-        if used:
-            return
-        metadata = {
-            "_id": url_id,
-            "created": str(date.today()),
-            "clicks": 0
-        }
-        await self.db[collection].insert_one(metadata)
-
     async def user_exists(self, collection: str, user_name: str):
         find = {"user_name": user_name}
         user = await self.db[collection].find_one(find)
@@ -77,16 +66,6 @@ class UrlDB:
         }
 
         await self.db[collection].update_one(update, increment)
-
-    async def user_url(self, collection: str, url_id: str, user: str):
-        find = {"user_name": user}
-        update = {
-            "$push": {
-                "urls": url_id
-            }
-        }
-
-        await self.db[collection].update_one(find, update)
 
 
 class Database:
@@ -127,6 +106,17 @@ class Database:
             await self.collection.insert_one(url_data)
             return models.UrlID(_id=url_data["_id"])
 
+        async def post_metadata(self, url_id: str):
+            used = await self.collection.find_one({"url": url_id})
+            if used:
+                return
+            metadata = {
+                "_id": url_id,
+                "created": str(date.today()),
+                "clicks": 0
+            }
+            await self.collection.insert_one(metadata)
+
     class User:
         def __init__(self, collection):
             self.collection = collection
@@ -144,6 +134,16 @@ class Database:
             find = {"user_name": user_name}
             user = await self.collection.find_one(find)
             return True if user else False
+
+        async def add_url(self, url_id: str, name: str):
+            find = {"user_name": name}
+            update = {
+                "$push": {
+                    "urls": url_id
+                }
+            }
+
+            await self.collection.update_one(find, update)
 
     def close(self) -> None:
         # Kills the connection with the database

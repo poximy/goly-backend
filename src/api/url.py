@@ -23,13 +23,14 @@ async def get_url(background_tasks: BackgroundTasks, request: Request,
 
 @router.post("/", response_model=models.UrlID, status_code=201)
 async def post_url(request: Request,
+                   background_tasks: BackgroundTasks,
                    body: models.UrlPOST):
-    url_collection = Database.Url = request.state.url
+    url_collection: Database.Url = request.state.url
+    user_collection: Database.User = request.state.user
 
     result = await url_collection.post(body.url)
 
-    # background_tasks.add_task(database.add_metadata, "metadata", result.id)
-    # # if body.user is not None:
-    # #     background_tasks.add_task(database.user_url, "user", result.id,
-    # #                               body.user)
+    if body.user is not None:
+        background_tasks.add_task(user_collection.add_url, result.id,
+                                  body.user)
     return result
