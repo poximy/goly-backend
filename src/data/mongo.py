@@ -116,11 +116,7 @@ class Database:
             return result
 
         async def post(self, url: str):
-            if used := await self.collection.find_one({"url": url}):
-                # Checks if the url is not in use
-                # True if the there is data False otherwise
-                return models.UrlID(_id=used["_id"])
-            # Creates a new id and saves it to the DB
+            # Creates a new url id and saves it to the DB
             url_id = await self.generator()
 
             url_data = {
