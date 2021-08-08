@@ -37,25 +37,6 @@ class UrlDB:
         values: Tuple[dict] = await asyncio.gather(*url_metadata)
         return [models.UrlMetadata(**value) for value in values]
 
-    async def user_exists(self, collection: str, user_name: str):
-        find = {"user_name": user_name}
-        user = await self.db[collection].find_one(find)
-        return True if user else False
-
-    async def create_user(self, collection: str, user: models.User):
-        exists = await self.user_exists(collection, user.user_name)
-
-        if not exists:
-            await self.db[collection].insert_one(
-                {
-                    "user_name": user.user_name,
-                    "password": bcrypt.hash(user.password),
-                    "urls": [],
-                }
-            )
-            return True
-        return False
-
 
 class Database:
     def __init__(self, mongo_uri: str):
@@ -144,6 +125,21 @@ class Database:
             }
 
             await self.collection.update_one(find, update)
+
+        async def create_user(self, user: models.User):
+            find = {"user_name": user.user_name}
+            exists = await self.collection.find_one(find)
+
+            if not exists:
+                await self.collection.insert_one(
+                    {
+                        "user_name": user.user_name,
+                        "password": bcrypt.hash(user.password),
+                        "urls": [],
+                    }
+                )
+                return True
+            return False
 
     def close(self) -> None:
         # Kills the connection with the database
