@@ -101,13 +101,14 @@ class Database:
         return self.User(self.db[collection])
 
     class Url:
-        def __init__(self, collection):
+        def __init__(self, collection, size: int = 6):
             self.collection = collection
+            self.size = size
 
-        async def generator(self, size: int = 6):
+        async def generator(self):
             # Generates a valid Base62 url id that isn't in the DB
             base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            return "".join(random.choices(base, k=size))
+            return "".join(random.choices(base, k=self.size))
 
         async def get(self, url_id: str):
             find = {"_id": url_id}
@@ -120,7 +121,7 @@ class Database:
                 # True if the there is data False otherwise
                 return models.UrlID(_id=used["_id"])
             # Creates a new id and saves it to the DB
-            url_id = await self.id_gen()
+            url_id = await self.generator()
 
             url_data = {
                 "_id": url_id,
