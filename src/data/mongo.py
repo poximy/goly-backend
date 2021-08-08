@@ -56,17 +56,6 @@ class UrlDB:
             return True
         return False
 
-    async def click(self, collection: str, url_id: str):
-        # Increments the click count
-        update = {"_id": url_id}
-        increment = {
-            "$inc": {
-                "clicks": 1
-            }
-        }
-
-        await self.db[collection].update_one(update, increment)
-
 
 class Database:
     def __init__(self, mongo_uri: str):
@@ -116,6 +105,17 @@ class Database:
                 "clicks": 0
             }
             await self.collection.insert_one(metadata)
+
+        async def click(self, url_id: str):
+            # Increments the click count
+            update = {"_id": url_id}
+            increment = {
+                "$inc": {
+                    "clicks": 1
+                }
+            }
+
+            await self.collection.update_one(update, increment)
 
     class User:
         def __init__(self, collection):
