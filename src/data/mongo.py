@@ -25,7 +25,7 @@ class Database:
             self.collection = collection
             self.size = size
 
-        async def generator(self):
+        def generator(self):
             # Generates a valid Base62 url id that isn't in the DB
             base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             return "".join(random.choices(base, k=self.size))
@@ -37,8 +37,7 @@ class Database:
 
         async def post(self, url: str):
             # Creates a new url id and saves it to the DB
-            url_id = await self.generator()
-
+            url_id = self.generator()
             url_data = {
                 "_id": url_id,
                 "url": url
