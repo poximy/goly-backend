@@ -9,35 +9,6 @@ from passlib.hash import bcrypt
 from . import models
 
 
-class UrlDB:
-    def __init__(self, uri: str) -> None:
-        self.client = AsyncIOMotorClient(uri)
-        self.db = self.client.url
-
-    def close(self) -> None:
-        # Kills the connection with the database
-        self.client.close()
-
-    async def get_user_urls(self, collection: str, user: str):
-        # Returns all url ids the user has created
-        user_data = await self.db[collection].find_one({"user_name": user})
-        url_ids: List[models.UrlID] = []
-        if user_data is not None:
-            for url_id in user_data["urls"]:
-                url = models.UrlID(_id=url_id)
-                url_ids.append(url)
-        return url_ids
-
-    async def get_metadata(self, collection: str, url_ids: List[models.UrlID]):
-        # Gets the data from a specific url id
-        url_metadata = []
-        for url_id in url_ids:
-            url = self.db[collection].find_one({"_id": url_id.id})
-            url_metadata.append(url)
-        values: Tuple[dict] = await asyncio.gather(*url_metadata)
-        return [models.UrlMetadata(**value) for value in values]
-
-
 class Database:
     def __init__(self, mongo_uri: str):
         self.client = AsyncIOMotorClient(mongo_uri)
@@ -140,6 +111,23 @@ class Database:
                 )
                 return True
             return False
+
+        async def get_urls(self, user: str):
+            # Returns all url ids the user has created
+            user_data = await self.collection.find_one({"user_name": user})
+            url_ids: List[models.UrlID] = []
+            if user_data is not None:
+                for url_id in user_data["urls"]:
+                    url = models.UrlID(_id=url_id)
+                    url_ids.append(url)
+
+            url_metadata = []
+            for url_id in url_ids:
+                url = self.collection.find({"_id": url_id.id})
+                url_metadata.append(url)
+
+            values: Tuple[dict] = await asyncio.gather(*url_metadata)
+            return [models.UrlMetadata(**value) for value in values]
 
     def close(self) -> None:
         # Kills the connection with the database
