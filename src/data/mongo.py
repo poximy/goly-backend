@@ -90,14 +90,14 @@ class UrlDB:
 
 
 class Database:
-    def __init__(self, uri: str):
-        self.client = AsyncIOMotorClient(uri)
+    def __init__(self, mongo_uri: str):
+        self.client = AsyncIOMotorClient(mongo_uri)
         self.db = self.client.url
 
-    def url(self, collection):
+    def url(self, collection: str):
         return self.Url(self.db[collection])
 
-    def user(self, collection):
+    def user(self, collection: str):
         return self.User(self.db[collection])
 
     class Url:
@@ -113,12 +113,12 @@ class Database:
                 if available is None:
                     return url_id
 
-        async def get(self, ID):
-            find = {"_id": ID}
+        async def get(self, url_id: str):
+            find = {"_id": url_id}
             result: dict = await self.collection.find_one(find)
             return result
 
-        async def post(self, url):
+        async def post(self, url: str):
             if used := await self.collection.find_one({"url": url}):
                 # Checks if the url is not in use
                 # True if the there is data False otherwise
