@@ -31,31 +31,26 @@ class Database:
             return "".join(random.choices(base, k=self.size))
 
         async def get(self, url_id: str):
-            find = {"_id": url_id}
+            find = {
+                "_id": url_id
+                }
+
             result: dict = await self.collection.find_one(find)
             return result
 
         async def post(self, url: str):
-            # Creates a new url id and saves it to the DB
+            # Creates a minified url and saves it to the DB
             url_id = self.generator()
-            url_data = {
-                "_id": url_id,
-                "url": url
-            }
 
-            await self.collection.insert_one(url_data)
-            return models.UrlID(_id=url_data["_id"])
-
-        async def post_metadata(self, url_id: str):
-            used = await self.collection.find_one({"url": url_id})
-            if used:
-                return
-            metadata = {
+            url_metadata = {
                 "_id": url_id,
+                "url": url,
                 "created": str(date.today()),
-                "clicks": 0
+                "clicks": 0,
             }
-            await self.collection.insert_one(metadata)
+
+            await self.collection.insert_one(url_metadata)
+            return url_metadata
 
         async def click(self, url_id: str):
             # Increments the click count
