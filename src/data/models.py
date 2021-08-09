@@ -22,3 +22,10 @@ class UrlMetadata(BaseModel):
 class UrlPOST(BaseModel):
     url: str
     user: Optional[str]
+
+
+class Url(BaseModel):
+    id: str = Field(alias="_id")
+    url: str
+    created: str
+    clicks: int = 0
