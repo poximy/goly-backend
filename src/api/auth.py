@@ -2,7 +2,6 @@ import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from src.data import models
 from src.data.mongo import Database
 
 router = APIRouter(tags=["auth"])
@@ -15,13 +14,7 @@ async def token_gen(request: Request,
                     form_data: OAuth2PasswordRequestForm = Depends()):
     user_collection: Database.User = request.state.user
 
-    data = {
-        "user_name": form_data.username,
-        "password": form_data.password
-    }
-
-    user = models.User(**data)
-    valid = await user_collection.login(user)
+    valid = await user_collection.login(form_data.username, form_data.password)
     if valid:
         token_data = {"user": form_data.username}
         token = jwt.encode(token_data, request.state.jwt)

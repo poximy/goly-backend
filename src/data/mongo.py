@@ -67,13 +67,13 @@ class Database:
         def __init__(self, collection):
             self.collection = collection
 
-        async def login(self, user: models.User):
-            exists = await self.exists(user.user_name)
+        async def login(self, user_name: str, password: str):
+            exists = await self.exists(user_name)
 
             if exists:
-                find_data = {"user_name": user.user_name}
+                find_data = {"user_name": user_name}
                 data = await self.collection.find_one(find_data)
-                verify = bcrypt.verify(user.password, data["password"])
+                verify = bcrypt.verify(password, data["password"])
                 return verify
 
         async def exists(self, user_name: str):
