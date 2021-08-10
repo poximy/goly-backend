@@ -7,16 +7,15 @@ from src.data.mongo import Database
 router = APIRouter(tags=["url"])
 
 
-@router.get("/{url_id}", status_code=301)
+@router.get("/{url_id}", response_class=RedirectResponse, status_code=301)
 async def get_url(background_tasks: BackgroundTasks, request: Request,
                   url_id: str):
     url_collection: Database.Url = request.state.url
 
-    background_tasks.add_task(url_collection.click, url_id)
-
     result = await url_collection.get(url_id)
-    if result:
-        return RedirectResponse(result["url"])
+    if result is not None:
+        background_tasks.add_task(url_collection.click, url_id)
+        return result["url"]
     detail = {"error": f"{url_id} does not exist"}
     raise HTTPException(status_code=404, detail=detail)
 
