@@ -1,7 +1,7 @@
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
+from pydantic import BaseModel
 from src.data.mongo import Database
 
 router = APIRouter(tags=["auth"])
@@ -9,9 +9,13 @@ router = APIRouter(tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-@router.post("/token")
-async def token_gen(request: Request,
-                    form_data: OAuth2PasswordRequestForm = Depends()):
+class TokenResponse(BaseModel):
+    access_token = str
+
+
+@router.post("/token", response_model=TokenResponse)
+async def token(request: Request,
+                form_data: OAuth2PasswordRequestForm = Depends()):
     user_collection: Database.User = request.state.user
 
     valid = await user_collection.login(form_data.username, form_data.password)
