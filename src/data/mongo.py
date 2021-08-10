@@ -1,12 +1,10 @@
 import asyncio
 import random
 from datetime import date
-from typing import List, Tuple
+from typing import Iterable, List
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.hash import bcrypt
-
-from . import models
 
 
 class Database:
@@ -63,6 +61,15 @@ class Database:
 
             await self.collection.update_one(update, increment)
 
+        async def metadata(self, url_ids: List[str]):
+            url_metadata = []
+            for url_id in url_ids:
+                url = self.collection.find({"_id": url_id})
+                url_metadata.append(url)
+
+            values: Iterable[dict] = await asyncio.gather(*url_metadata)
+            return values
+
     class User:
         def __init__(self, collection):
             self.collection = collection
@@ -109,19 +116,12 @@ class Database:
         async def get_urls(self, user: str):
             # Returns all url ids the user has created
             user_data = await self.collection.find_one({"user_name": user})
-            url_ids: List[models.UrlID] = []
+            url_ids: list[str] = []
             if user_data is not None:
                 for url_id in user_data["urls"]:
-                    url = models.UrlID(_id=url_id)
-                    url_ids.append(url)
+                    url_ids.append(url_id)
 
-            url_metadata = []
-            for url_id in url_ids:
-                url = self.collection.find({"_id": url_id.id})
-                url_metadata.append(url)
-
-            values: Tuple[dict] = await asyncio.gather(*url_metadata)
-            return [models.UrlMetadata(**value) for value in values]
+            return url_ids
 
     def close(self) -> None:
         # Kills the connection with the database
