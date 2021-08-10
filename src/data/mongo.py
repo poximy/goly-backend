@@ -91,15 +91,15 @@ class Database:
 
             await self.collection.update_one(find, update)
 
-        async def create_user(self, user: models.User):
-            find = {"user_name": user.user_name}
+        async def register(self, username: str, password: str) -> bool:
+            find = {"user_name": username}
             exists = await self.collection.find_one(find)
 
             if not exists:
                 await self.collection.insert_one(
                     {
-                        "user_name": user.user_name,
-                        "password": bcrypt.hash(user.password),
+                        "user_name": username,
+                        "password": bcrypt.hash(password),
                         "urls": [],
                     }
                 )
