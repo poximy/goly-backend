@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -7,11 +7,6 @@ class User(BaseModel):
     user_name: str
     password: str
     urls: List[str] = list()
-
-
-class UrlPOST(BaseModel):
-    url: str
-    user: Optional[str]
 
 
 class Url(BaseModel):
