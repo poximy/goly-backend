@@ -10,7 +10,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 class TokenResponse(BaseModel):
-    access_token = str
+    access_token: str
 
 
 @router.post("/token", response_model=TokenResponse)
