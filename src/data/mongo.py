@@ -30,7 +30,7 @@ class Database:
         async def get(self, url_id: str):
             find = {
                 "_id": url_id
-                }
+            }
 
             result: dict = await self.collection.find_one(find)
             return result
@@ -116,7 +116,7 @@ class Database:
         async def get_urls(self, user: str) -> List[str]:
             # Returns all url ids the user has created
             user_data = await self.collection.find_one({"user_name": user})
-            url_ids: list[str] = []
+            url_ids: List[str] = []
 
             if user_data is not None:
                 url_ids = [url_id for url_id in user_data["urls"]]
