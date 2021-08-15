@@ -1,7 +1,6 @@
-import asyncio
 import random
 from datetime import date
-from typing import Iterable, List
+from typing import List
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.hash import bcrypt
@@ -61,14 +60,14 @@ class Database:
 
             await self.collection.update_one(update, increment)
 
-        async def metadata(self, url_ids: List[str]):
-            url_metadata = []
-            for url_id in url_ids:
-                url = self.collection.find({"_id": url_id})
-                url_metadata.append(url)
+        async def metadata(self, url_ids: List[str]) -> List[dict]:
+            query = {
+                "_id": {
+                    "$in": url_ids
+                }
+            }
 
-            values: Iterable[dict] = await asyncio.gather(*url_metadata)
-            return values
+            return [document async for document in self.collection.find(query)]
 
     class User:
         def __init__(self, collection):
