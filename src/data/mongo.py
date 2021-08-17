@@ -22,11 +22,6 @@ class Database:
             self.collection = collection
             self.size = size
 
-        def generator(self) -> str:
-            # Generates a valid Base62 url id that isn't in the DB
-            base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            return "".join(random.choices(base, k=self.size))
-
         async def get(self, url_id: str):
             find = {
                 "_id": url_id
@@ -37,7 +32,8 @@ class Database:
 
         async def post(self, url: str):
             # Creates a minified url and saves it to the DB
-            url_id = self.generator()
+            base = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            url_id = "".join(random.choices(base, k=self.size))
 
             url_metadata = {
                 "_id": url_id,
@@ -74,19 +70,12 @@ class Database:
             self.collection = collection
 
         async def login(self, user_name: str, password: str) -> bool:
-            exists = await self.exists(user_name)
+            find_data = {"user_name": user_name}
 
-            if exists:
-                find_data = {"user_name": user_name}
-                data = await self.collection.find_one(find_data)
-                verify: bool = bcrypt.verify(password, data["password"])
+            if (user := await self.collection.find_one(find_data)) is not None:
+                verify: bool = bcrypt.verify(password, user["password"])
                 return verify
             return False
-
-        async def exists(self, user_name: str) -> bool:
-            find = {"user_name": user_name}
-            user = await self.collection.find_one(find)
-            return True if user else False
 
         async def add_url(self, url_id: str, name: str) -> None:
             find = {"user_name": name}
