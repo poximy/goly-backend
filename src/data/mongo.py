@@ -23,6 +23,7 @@ class Database:
             self.size = size
 
         async def get(self, url_id: str):
+            # finds the given and its associated url
             find = {
                 "_id": url_id
             }
@@ -57,6 +58,7 @@ class Database:
             await self.collection.update_one(update, increment)
 
         async def metadata(self, url_ids: List[str]) -> List[dict]:
+            # returns metadata for each id
             query = {
                 "_id": {
                     "$in": url_ids
@@ -69,16 +71,17 @@ class Database:
         def __init__(self, collection):
             self.collection = collection
 
-        async def login(self, user_name: str, password: str) -> bool:
-            find_data = {"user_name": user_name}
+        async def login(self, username: str, password: str) -> bool:
+            find_data = {"user_name": username}
 
             if (user := await self.collection.find_one(find_data)) is not None:
                 verify: bool = bcrypt.verify(password, user["password"])
                 return verify
             return False
 
-        async def add_url(self, url_id: str, name: str) -> None:
-            find = {"user_name": name}
+        async def add_url(self, url_id: str, username: str) -> None:
+            # adds a url to a given user via a given id
+            find = {"user_name": username}
             update = {
                 "$push": {
                     "urls": url_id
@@ -89,9 +92,8 @@ class Database:
 
         async def register(self, username: str, password: str) -> bool:
             find = {"user_name": username}
-            exists = await self.collection.find_one(find)
 
-            if not exists:
+            if not await self.collection.find_one(find):
                 await self.collection.insert_one(
                     {
                         "user_name": username,
@@ -102,10 +104,10 @@ class Database:
                 return True
             return False
 
-        async def get_urls(self, user: str) -> List[str]:
+        async def get_urls(self, username: str) -> List[str]:
             # Returns all url ids the user has created
-            user_data = await self.collection.find_one({"user_name": user})
             url_ids: List[str] = []
+            user_data = await self.collection.find_one({"user_name": username})
 
             if user_data is not None:
                 url_ids = [url_id for url_id in user_data["urls"]]
