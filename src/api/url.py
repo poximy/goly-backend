@@ -22,15 +22,12 @@ async def get_url(background_tasks: BackgroundTasks, request: Request,
 
 
 @router.post("/", response_model=models.Url, status_code=201)
-async def post_url(background_tasks: BackgroundTasks,
-                   request: Request,
+async def post_url(background_tasks: BackgroundTasks, request: Request,
                    url: str = Body(..., embed=True)):
     url_collection: Database.Url = request.state.url
 
     res = await url_collection.post(url)
-
-    auth = request.headers.get("authorization")
-    if auth is not None:
+    if (auth := request.headers.get("authorization")) is not None:
         user_collection: Database.User = request.state.user
 
         token: str = auth.split()[1]
