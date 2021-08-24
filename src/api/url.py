@@ -11,10 +11,11 @@ router = APIRouter(tags=["url"])
 @router.get("/{url_id}", response_class=RedirectResponse, status_code=301)
 async def get_url(background_tasks: BackgroundTasks, request: Request,
                   url_id: str):
+    # redirects the client to original url if exists
     url_collection: Database.Url = request.state.url
 
     result = await url_collection.get(url_id)
-    if result is not None:
+    if result is not None:  # updates click count if valid
         background_tasks.add_task(url_collection.click, url_id)
         return result["url"]
     detail = {"error": f"{url_id} does not exist"}
@@ -35,5 +36,4 @@ async def post_url(background_tasks: BackgroundTasks, request: Request,
         user = jwt_data["user"]
 
         background_tasks.add_task(user_collection.add_url, res["_id"], user)
-
     return res

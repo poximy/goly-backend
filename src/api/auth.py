@@ -17,6 +17,7 @@ class TokenResponse(BaseModel):
 @router.post("/token", response_model=TokenResponse)
 async def token(request: Request,
                 form_data: OAuth2PasswordRequestForm = Depends()):
+    # validates if the user exists then created a token based on the user
     user_collection: Database.User = request.state.user
 
     valid = await user_collection.login(form_data.username, form_data.password)

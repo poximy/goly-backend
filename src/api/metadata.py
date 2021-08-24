@@ -14,6 +14,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.get("/user/metadata", response_model=List[models.Url])
 async def metadata(request: Request, token: str = Depends(oauth2_scheme)):
+    # returns all urls associated with a specified user
     url_collection: Database.Url = request.state.url
     user_collection: Database.User = request.state.user
 
