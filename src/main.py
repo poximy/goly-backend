@@ -12,8 +12,8 @@ config = settings.Settings()
 # Starts the Database
 database = mongo.Database(config.mongo_uri)
 # Database collection connections
-url_collection = database.url("links")
-user_collection = database.user("user")
+url_collection = database.url(config.url_collection)
+user_collection = database.user(config.user_collection)
 
 JWT = config.jwt
 
