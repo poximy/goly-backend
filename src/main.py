@@ -2,15 +2,16 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api import auth, metadata, url, user
-from src.data import mongo, settings
+from src.data.settings import Settings
+from src.data.mongo import Database
 
 app = FastAPI()
 
 # values from .env file
-config = settings.Settings()
+config = Settings()
 
 # Starts the Database
-database = mongo.Database(config.mongo_uri)
+database = Database(config.mongo_uri)
 # Database collection connections
 url_collection = database.url(config.url_collection)
 user_collection = database.user(config.user_collection)

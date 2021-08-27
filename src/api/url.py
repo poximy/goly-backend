@@ -2,7 +2,7 @@ import jwt
 from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
-from src.data import models
+from src.data.models import Url
 from src.data.mongo import Database
 
 router = APIRouter(tags=["url"])
@@ -22,7 +22,7 @@ async def get_url(background_tasks: BackgroundTasks, request: Request,
     raise HTTPException(status_code=404, detail=detail)
 
 
-@router.post("/", response_model=models.Url, status_code=201)
+@router.post("/", response_model=Url, status_code=201)
 async def post_url(background_tasks: BackgroundTasks, request: Request,
                    url: str = Body(..., embed=True)):
     url_collection: Database.Url = request.state.url

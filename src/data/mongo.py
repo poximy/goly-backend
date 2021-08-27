@@ -1,5 +1,5 @@
-import random
 from datetime import date
+from random import choices
 from string import ascii_letters, digits
 from typing import List
 
@@ -35,7 +35,7 @@ class Database:
         async def post(self, url: str):
             # Creates a minified url and saves it to the DB
             base = ascii_letters + digits
-            url_id = "".join(random.choices(base, k=self.size))
+            url_id = "".join(choices(base, k=self.size))
 
             url_metadata = {
                 "_id": url_id,
