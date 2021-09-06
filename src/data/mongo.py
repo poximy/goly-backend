@@ -91,6 +91,16 @@ class Database:
 
             await self.collection.update_one(find, update)
 
+        async def delete_url(self, url_id: str, username: str):
+            find = {"user_name": username}
+            update = {
+                "$pull": {
+                    "urls": url_id
+                }
+            }
+
+            await self.collection.update_one(find, update)
+
         async def register(self, username: str, password: str) -> bool:
             find = {"user_name": username}
 
