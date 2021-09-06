@@ -1,11 +1,13 @@
 import jwt
-from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Request
+from fastapi import (APIRouter, BackgroundTasks, Body, Depends, HTTPException,
+                     Request)
 from fastapi.responses import RedirectResponse
-
+from fastapi.security import OAuth2PasswordBearer
 from src.data.models import Url
 from src.data.mongo import Database
 
 router = APIRouter(tags=["url"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.get("/{url_id}", response_class=RedirectResponse, status_code=301)
@@ -37,3 +39,14 @@ async def post_url(background_tasks: BackgroundTasks, request: Request,
 
         background_tasks.add_task(user_collection.add_url, res["_id"], user)
     return res
+
+
+@router.delete("/{url_id}")
+async def delete_url(url_id: str, request: Request,
+                     token: str = Depends(oauth2_scheme)):
+    user_collection: Database.User = request.state.user
+
+    jwt_data = jwt.decode(token, request.state.jwt, algorithms=["HS256"])
+    username = jwt_data["user"]
+    await user_collection.delete_url(url_id, username)
+    return {"message": f"{url_id} was deleted"}
