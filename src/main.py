@@ -21,7 +21,7 @@ JWT = config.jwt
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["OPTIONS", "POST", "GET"],
+    allow_methods=["OPTIONS", "POST", "GET", "DELETE"],
     allow_headers=["*"],
 )
 
