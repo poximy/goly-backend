@@ -2,6 +2,8 @@
 
 This project is built using python & FastAPI framework
 
+Want to see the api, go to: `https://atom-url.herokuapp.com/docs`
+
 ## Quickstart
 
 first clone the back-end: `https://github.com/erickzv/url-shortener-backend.git`
