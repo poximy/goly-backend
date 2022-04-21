@@ -1,12 +1,1 @@
-# Folders
-__pycache__/
-venv/
-
-.idea/
-
-# Files
-*.py[cod]
 .DS_Store
-
-# Enviorment variables
-.env
