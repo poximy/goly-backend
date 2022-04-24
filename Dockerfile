@@ -14,6 +14,6 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN go build -o app src/main.go
+RUN go build -o app main.go
 
 CMD ["./app"]
