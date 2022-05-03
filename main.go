@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/poximy/url-shortener-backend/api"
 )
 
 func main() {
@@ -18,7 +19,12 @@ func main() {
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "application/json"},
 	}))
 
-	http.ListenAndServe(port(), r)
+	r.Mount("/", api.UrlRouter())
+
+	err := http.ListenAndServe(port(), r)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func port() string {
