@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/poximy/url-shortener-backend/api"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/poximy/url-shortener-backend/api"
 )
 
 func main() {
