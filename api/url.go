@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -14,9 +13,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var ctx = context.Background()
+
+var rdb = database.RedisClient()
+var col = database.MongoClient().Database("goly").Collection("url")
 
 func UrlRouter() http.Handler {
 	r := chi.NewRouter()
@@ -30,13 +33,15 @@ func UrlRouter() http.Handler {
 // Redirects to original url
 func getUrl(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-
-	rdb := database.RedisClient()
 	url, err := rdb.Get(ctx, id).Result()
 
 	switch {
 	case err == redis.Nil:
-		http.Error(w, "error: id does not exist", http.StatusInternalServerError)
+		url, err := findUrl(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		http.Redirect(w, r, url, http.StatusMovedPermanently)
 		return
 	case err != nil:
 		http.Error(w, "error: something went wrong", http.StatusInternalServerError)
@@ -49,9 +54,21 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusMovedPermanently)
 }
 
+func findUrl(id string) (string, error) {
+	var res PostBody
+	filterQuery := bson.D{{Key: "_id", Value: id}}
+
+	err := col.FindOne(ctx, filterQuery).Decode(&res)
+	if err != nil {
+		return "", errors.New("error: id does not exist")
+	}
+
+	return res.Url, nil
+}
+
 type PostBody struct {
-	ID  string `json:"id"`
-	Url string `json:"url"`
+	ID  string `json:"id" bson:"_id"`
+	Url string `json:"url" bson:"url"`
 }
 
 // Creates a shortend url & saves it to redis
@@ -62,7 +79,7 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = cachePost(body)
+	err = cacheAndSave(body)
 	if err != nil {
 		http.Error(w, "error: something went wrong while saving", http.StatusInternalServerError)
 		return
@@ -76,12 +93,14 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func cachePost(data PostBody) error {
-	rdb := database.RedisClient()
+func cacheAndSave(data PostBody) error {
 	err := rdb.Set(ctx, data.ID, data.Url, 120*time.Second).Err()
-
 	if err != nil {
-		fmt.Println(err)
+		return errors.New("error: something went wrong")
+	}
+
+	_, err = col.InsertOne(ctx, data)
+	if err != nil {
 		return errors.New("error: something went wrong")
 	}
 	return nil
