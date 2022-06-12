@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -23,6 +24,7 @@ var col = database.MongoClient().Database("goly").Collection("url")
 
 func UrlRouter() http.Handler {
 	r := chi.NewRouter()
+	fmt.Println("Url router is running")
 
 	r.Get("/{id}", getUrl)
 	r.Post("/", postUrl)
