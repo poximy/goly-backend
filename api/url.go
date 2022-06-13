@@ -76,7 +76,7 @@ type PostBody struct {
 	Url string `json:"url" bson:"url"`
 }
 
-// Creates a shortend url & saves it to redis
+// Creates a shortened url & saves it to redis
 func postUrl(w http.ResponseWriter, r *http.Request) {
 	body, err := verifyPostBody(r.Body)
 	if err != nil {
