@@ -15,6 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var ctx = context.Background()
@@ -61,8 +62,10 @@ func findUrl(id string) (string, error) {
 	filterQuery := bson.D{{Key: "_id", Value: id}}
 
 	err := col.FindOne(ctx, filterQuery).Decode(&res)
-	if err != nil {
+	if err == mongo.ErrNoDocuments {
 		return "", errors.New("error: id does not exist")
+	} else if err != nil {
+		return "", errors.New("error: something went wrong")
 	}
 
 	return res.Url, nil
