@@ -43,6 +43,7 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 		url, err := findUrl(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		http.Redirect(w, r, url, http.StatusMovedPermanently)
 		return
