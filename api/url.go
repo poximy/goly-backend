@@ -59,7 +59,7 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func findUrl(id string) (string, error) {
-	var res PostBody
+	var res Goly
 	filterQuery := bson.D{{Key: "_id", Value: id}}
 
 	err := col.FindOne(ctx, filterQuery).Decode(&res)
@@ -69,12 +69,12 @@ func findUrl(id string) (string, error) {
 		return "", errors.New("error: something went wrong")
 	}
 
-	return res.Url, nil
+	return res.Redirect, nil
 }
 
-type PostBody struct {
-	ID  string `json:"id" bson:"_id"`
-	Url string `json:"url" bson:"url"`
+type Goly struct {
+	ID       string `json:"id" bson:"_id"`
+	Redirect string `json:"redirect" bson:"redirect"`
 }
 
 // Creates a shortened url & saves it to redis
@@ -99,8 +99,8 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func cacheAndSave(data PostBody) error {
-	err := rdb.Set(ctx, data.ID, data.Url, 120*time.Second).Err()
+func cacheAndSave(data Goly) error {
+	err := rdb.Set(ctx, data.ID, data.Redirect, 120*time.Second).Err()
 	if err != nil {
 		return errors.New("error: something went wrong")
 	}
@@ -113,15 +113,15 @@ func cacheAndSave(data PostBody) error {
 }
 
 // Verifies request data is valid
-func verifyPostBody(data io.Reader) (PostBody, error) {
-	var body PostBody
+func verifyPostBody(data io.Reader) (Goly, error) {
+	var body Goly
 	err := json.NewDecoder(data).Decode(&body)
 	if err != nil {
-		return PostBody{}, errors.New("error: unable to parse json")
+		return Goly{}, errors.New("error: unable to parse json")
 	}
 
-	if body.Url == "" {
-		return PostBody{}, errors.New("error: missing field url")
+	if body.Redirect == "" {
+		return Goly{}, errors.New("error: missing field url")
 	}
 
 	body.ID = idGen()
