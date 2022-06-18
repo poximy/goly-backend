@@ -50,9 +50,6 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 	case err != nil:
 		http.Error(w, "error: something went wrong", http.StatusInternalServerError)
 		return
-	case url == "":
-		http.Error(w, "error: url not found", http.StatusInternalServerError)
-		return
 	}
 
 	http.Redirect(w, r, url, http.StatusMovedPermanently)
