@@ -23,6 +23,8 @@ var ctx = context.Background()
 var rdb = database.RedisClient()
 var col = database.MongoClient().Database("goly").Collection("url")
 
+const choice = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+
 func UrlRouter() http.Handler {
 	r := chi.NewRouter()
 	fmt.Println("Url router is running")
@@ -31,6 +33,39 @@ func UrlRouter() http.Handler {
 	r.Post("/", postUrl)
 
 	return r
+}
+
+type Goly struct {
+	ID       string `json:"id" bson:"_id"`
+	Redirect string `json:"redirect" bson:"redirect"`
+}
+
+func (g *Goly) IdGen() {
+	var id string
+
+	length := len(choice)
+	rand.Seed(time.Now().UnixNano())
+
+	for i := 0; i < 6; i++ {
+		char := choice[rand.Intn(length)]
+		id += string(char)
+	}
+
+	g.ID = id
+}
+
+func (g Goly) CacheAndSave() error {
+	err := rdb.Set(ctx, g.ID, g.Redirect, 120*time.Second).Err()
+	if err != nil {
+		return errors.New("error: something went wrong while caching")
+	}
+
+	_, err = col.InsertOne(ctx, g)
+	if err != nil {
+		return errors.New("error: something went wrong saving")
+	}
+
+	return nil
 }
 
 // Redirects to original url
@@ -69,11 +104,6 @@ func findUrl(id string) (string, error) {
 	return res.Redirect, nil
 }
 
-type Goly struct {
-	ID       string `json:"id" bson:"_id"`
-	Redirect string `json:"redirect" bson:"redirect"`
-}
-
 // Creates a shortened url & saves it to redis
 func postUrl(w http.ResponseWriter, r *http.Request) {
 	body, err := verifyPostBody(r.Body)
@@ -82,9 +112,9 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = cacheAndSave(body)
+	err = body.CacheAndSave()
 	if err != nil {
-		http.Error(w, "error: something went wrong while saving", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -94,19 +124,6 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-func cacheAndSave(data Goly) error {
-	err := rdb.Set(ctx, data.ID, data.Redirect, 120*time.Second).Err()
-	if err != nil {
-		return errors.New("error: something went wrong")
-	}
-
-	_, err = col.InsertOne(ctx, data)
-	if err != nil {
-		return errors.New("error: something went wrong")
-	}
-	return nil
 }
 
 // Verifies request data is valid
@@ -121,23 +138,7 @@ func verifyPostBody(data io.Reader) (Goly, error) {
 		return Goly{}, errors.New("error: missing field url")
 	}
 
-	body.ID = idGen()
+	body.IdGen()
 
 	return body, nil
-}
-
-const choice = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-
-func idGen() string {
-	var id string
-
-	length := len(choice)
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 6; i++ {
-		char := choice[rand.Intn(length)]
-		id += string(char)
-	}
-
-	return id
 }
