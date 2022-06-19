@@ -75,7 +75,7 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case err == redis.Nil:
-		url, err := findUrl(id)
+		url, err := findAndCache(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -90,7 +90,7 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusMovedPermanently)
 }
 
-func findUrl(id string) (string, error) {
+func findAndCache(id string) (string, error) {
 	var res Goly
 	filterQuery := bson.D{{Key: "_id", Value: id}}
 
@@ -101,6 +101,10 @@ func findUrl(id string) (string, error) {
 		return "", errors.New("error: something went wrong")
 	}
 
+	err = rdb.Set(ctx, res.ID, res.Redirect, 120*time.Second).Err()
+	if err != nil {
+		return "", errors.New("error: something went wrong while caching")
+	}
 	return res.Redirect, nil
 }
 
