@@ -26,8 +26,8 @@ var col = database.MongoClient().Database("goly").Collection("url")
 const choice = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
 func UrlRouter() http.Handler {
-	r := chi.NewRouter()
 	fmt.Println("Url router is running")
+	r := chi.NewRouter()
 
 	r.Get("/{id}", getUrl)
 	r.Post("/", postUrl)
@@ -36,8 +36,8 @@ func UrlRouter() http.Handler {
 }
 
 type Goly struct {
-	ID       string `json:"id" bson:"_id"`
-	Redirect string `json:"redirect" bson:"redirect"`
+	ID  string `json:"id" bson:"_id"`
+	Url string `json:"url" bson:"url"`
 }
 
 func (g *Goly) IdGen() {
@@ -54,8 +54,8 @@ func (g *Goly) IdGen() {
 	g.ID = id
 }
 
-func (g Goly) CacheAndSave() error {
-	err := rdb.Set(ctx, g.ID, g.Redirect, 120*time.Second).Err()
+func (g *Goly) CacheAndSave() error {
+	err := rdb.Set(ctx, g.ID, g.Url, 120*time.Second).Err()
 	if err != nil {
 		return errors.New("error: something went wrong while caching")
 	}
@@ -101,11 +101,11 @@ func findAndCache(id string) (string, error) {
 		return "", errors.New("error: something went wrong")
 	}
 
-	err = rdb.Set(ctx, res.ID, res.Redirect, 120*time.Second).Err()
+	err = rdb.Set(ctx, res.ID, res.Url, 120*time.Second).Err()
 	if err != nil {
 		return "", errors.New("error: something went wrong while caching")
 	}
-	return res.Redirect, nil
+	return res.Url, nil
 }
 
 // Creates a shortened url & saves it to redis
@@ -138,7 +138,7 @@ func verifyPostBody(data io.Reader) (Goly, error) {
 		return Goly{}, errors.New("error: unable to parse json")
 	}
 
-	if body.Redirect == "" {
+	if body.Url == "" {
 		return Goly{}, errors.New("error: missing field url")
 	}
 
