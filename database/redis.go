@@ -1,9 +1,17 @@
 package database
 
-import "github.com/go-redis/redis/v8"
+import (
+	"os"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/joho/godotenv"
+)
 
 func RedisClient() *redis.Client {
-	opt, err := redis.ParseURL("")
+	godotenv.Load()
+	URI := os.Getenv("REDIS")
+
+	opt, err := redis.ParseURL(URI)
 	if err != nil {
 		panic(err)
 	}
