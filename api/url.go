@@ -91,21 +91,29 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func findAndCache(id string) (string, error) {
-	var res Goly
-	filterQuery := bson.D{{Key: "_id", Value: id}}
+	var res map[string]string
 
-	err := col.FindOne(ctx, filterQuery).Decode(&res)
+	filterQuery := bson.D{{Key: "_id", Value: id}}
+	opts := options.FindOne().SetProjection(bson.D{
+		{Key: "_id", Value: false},
+		{Key: "url", Value: true},
+	})
+
+	err := col.FindOne(ctx, filterQuery, opts).Decode(&res)
 	if err == mongo.ErrNoDocuments {
 		return "", errors.New("error: id does not exist")
 	} else if err != nil {
 		return "", errors.New("error: something went wrong")
 	}
 
-	err = rdb.Set(ctx, res.ID, res.Url, 120*time.Second).Err()
+	url := res["url"]
+
+	err = rdb.Set(ctx, id, url, 120*time.Second).Err()
 	if err != nil {
 		return "", errors.New("error: something went wrong while caching")
 	}
-	return res.Url, nil
+
+	return url, nil
 }
 
 // Creates a shortened url & saves it to redis
