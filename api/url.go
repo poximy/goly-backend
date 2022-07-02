@@ -16,6 +16,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var ctx = context.Background()
@@ -36,8 +37,9 @@ func UrlRouter() http.Handler {
 }
 
 type Goly struct {
-	ID  string `json:"id" bson:"_id"`
-	Url string `json:"url" bson:"url"`
+	ID     string `json:"id" bson:"_id"`
+	Url    string `json:"url" bson:"url"`
+	Clicks int    `json:"clicks" bson:"clicks"`
 }
 
 func (g *Goly) IdGen() {
@@ -87,33 +89,45 @@ func getUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filterQuery := bson.M{"_id": id}
+	UpdateQuery := bson.M{"$inc": bson.M{"clicks": 1}}
+	_, err = col.UpdateOne(ctx, filterQuery, UpdateQuery)
+	if err != nil {
+		http.Error(w, "error: something went wrong", http.StatusInternalServerError)
+		return
+	}
+
 	http.Redirect(w, r, url, http.StatusMovedPermanently)
 }
 
 func findAndCache(id string) (string, error) {
-	var res map[string]string
+	var goly map[string]string
 
-	filterQuery := bson.D{{Key: "_id", Value: id}}
-	opts := options.FindOne().SetProjection(bson.D{
-		{Key: "_id", Value: false},
-		{Key: "url", Value: true},
+	filterQuery := bson.M{"_id": id}
+	UpdateQuery := bson.M{"$inc": bson.M{"clicks": 1}}
+	optionsQuery := options.FindOneAndUpdate().SetProjection(bson.M{
+		"_id": false,
+		"url": true,
 	})
 
-	err := col.FindOne(ctx, filterQuery, opts).Decode(&res)
+	res := col.FindOneAndUpdate(ctx, filterQuery, UpdateQuery, optionsQuery)
+	err := res.Err()
 	if err == mongo.ErrNoDocuments {
 		return "", errors.New("error: id does not exist")
 	} else if err != nil {
 		return "", errors.New("error: something went wrong")
 	}
 
-	url := res["url"]
-
-	err = rdb.Set(ctx, id, url, 120*time.Second).Err()
+	err = res.Decode(&goly)
 	if err != nil {
 		return "", errors.New("error: something went wrong while caching")
 	}
 
-	return url, nil
+	err = rdb.Set(ctx, id, goly["url"], 120*time.Second).Err()
+	if err != nil {
+		return "", errors.New("error: something went wrong while caching")
+	}
+	return goly["url"], nil
 }
 
 // Creates a shortened url & saves it to redis
@@ -151,6 +165,7 @@ func verifyPostBody(data io.Reader) (Goly, error) {
 	}
 
 	body.IdGen()
+	body.Clicks = 0
 
 	return body, nil
 }
