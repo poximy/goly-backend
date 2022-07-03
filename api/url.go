@@ -42,34 +42,6 @@ type Goly struct {
 	Clicks int    `json:"clicks" bson:"clicks"`
 }
 
-func (g *Goly) IdGen() {
-	var id string
-
-	length := len(choice)
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 6; i++ {
-		char := choice[rand.Intn(length)]
-		id += string(char)
-	}
-
-	g.ID = id
-}
-
-func (g *Goly) CacheAndSave() error {
-	err := rdb.Set(ctx, g.ID, g.Url, 120*time.Second).Err()
-	if err != nil {
-		return errors.New("error: something went wrong while caching")
-	}
-
-	_, err = col.InsertOne(ctx, g)
-	if err != nil {
-		return errors.New("error: something went wrong saving")
-	}
-
-	return nil
-}
-
 // Redirects to original url
 func getUrl(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
@@ -138,7 +110,7 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = body.CacheAndSave()
+	err = CacheAndSave(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -164,8 +136,36 @@ func verifyPostBody(data io.Reader) (Goly, error) {
 		return Goly{}, errors.New("error: missing field url")
 	}
 
-	body.IdGen()
+	body.ID = generateID()
 	body.Clicks = 0
 
 	return body, nil
+}
+
+func generateID() string {
+	var id string
+
+	length := len(choice)
+	rand.Seed(time.Now().UnixNano())
+
+	for i := 0; i < 6; i++ {
+		char := choice[rand.Intn(length)]
+		id += string(char)
+	}
+
+	return id
+}
+
+func CacheAndSave(g Goly) error {
+	err := rdb.Set(ctx, g.ID, g.Url, 120*time.Second).Err()
+	if err != nil {
+		return errors.New("error: something went wrong while caching")
+	}
+
+	_, err = col.InsertOne(ctx, g)
+	if err != nil {
+		return errors.New("error: something went wrong saving")
+	}
+
+	return nil
 }
