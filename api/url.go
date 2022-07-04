@@ -95,10 +95,11 @@ func findAndCache(id string) (string, error) {
 		return "", errors.New("error: something went wrong while caching")
 	}
 
-	err = rdb.Set(ctx, id, goly["url"], 120*time.Second).Err()
+	err = cache(id, goly["url"])
 	if err != nil {
-		return "", errors.New("error: something went wrong while caching")
+		return "", err
 	}
+
 	return goly["url"], nil
 }
 
@@ -157,15 +158,40 @@ func generateID() string {
 }
 
 func CacheAndSave(g Goly) error {
-	err := rdb.Set(ctx, g.ID, g.Url, 120*time.Second).Err()
+	c := make(chan error)
+
+	go func() {
+		err := cache(g.ID, g.Url)
+		c <- err
+	}()
+
+	go save(g, c)
+
+	for i := 0; i < 2; i++ {
+		err := <-c
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func cache(id string, url string) error {
+	const CacheTime = 120 * time.Second
+
+	err := rdb.Set(ctx, id, url, CacheTime).Err()
 	if err != nil {
 		return errors.New("error: something went wrong while caching")
 	}
 
-	_, err = col.InsertOne(ctx, g)
-	if err != nil {
-		return errors.New("error: something went wrong saving")
-	}
-
 	return nil
+}
+
+func save(g Goly, c chan<- error) {
+	_, err := col.InsertOne(ctx, g)
+	if err != nil {
+		c <- errors.New("error: something went wrong saving")
+		return
+	}
+	c <- nil
 }
