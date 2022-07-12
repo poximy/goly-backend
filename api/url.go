@@ -158,7 +158,8 @@ func generateID() string {
 }
 
 func CacheAndSave(g Goly) error {
-	c := make(chan error)
+	const errAmount int8 = 2
+	c := make(chan error, errAmount)
 
 	go func() {
 		err := cache(g.ID, g.Url)
@@ -167,8 +168,8 @@ func CacheAndSave(g Goly) error {
 
 	go save(g, c)
 
-	for i := 0; i < 2; i++ {
-		err := <-c
+	close(c)
+	for err := range c {
 		if err != nil {
 			return err
 		}
@@ -177,9 +178,9 @@ func CacheAndSave(g Goly) error {
 }
 
 func cache(id string, url string) error {
-	const CacheTime = 120 * time.Second
+	const cacheTime = 120 * time.Second
 
-	err := rdb.Set(ctx, id, url, CacheTime).Err()
+	err := rdb.Set(ctx, id, url, cacheTime).Err()
 	if err != nil {
 		return errors.New("error: something went wrong while caching")
 	}
