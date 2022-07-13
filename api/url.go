@@ -117,12 +117,14 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Add("Content-Type", "application/json")
 }
 
 // Verifies request data is valid
