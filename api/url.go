@@ -161,8 +161,8 @@ func generateID() string {
 }
 
 func cacheAndSave(g goly) error {
-	const errAmount int8 = 2
-	c := make(chan error, errAmount)
+	c := make(chan error)
+	const errAmount int = 2
 
 	go func() {
 		err := cache(g.ID, g.URL)
@@ -171,8 +171,8 @@ func cacheAndSave(g goly) error {
 
 	go save(g, c)
 
-	close(c)
-	for err := range c {
+	for i := 0; i < errAmount; i++ {
+		err := <-c
 		if err != nil {
 			return err
 		}
