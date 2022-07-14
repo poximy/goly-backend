@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// MongoClient creates a mongo database connection
 func MongoClient() *mongo.Client {
 	godotenv.Load()
 	URI := os.Getenv("MONGO")

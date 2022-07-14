@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// RedisClient creates a redis database connection
 func RedisClient() *redis.Client {
 	godotenv.Load()
 	URI := os.Getenv("REDIS")

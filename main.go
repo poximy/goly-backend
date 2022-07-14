@@ -20,7 +20,7 @@ func main() {
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "application/json"},
 	}))
 
-	r.Mount("/", api.UrlRouter())
+	r.Mount("/", api.URLRouter())
 
 	err := http.ListenAndServe(port(), r)
 	if err != nil {

@@ -26,24 +26,25 @@ var col = database.MongoClient().Database("goly").Collection("url")
 
 const choice = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
-func UrlRouter() http.Handler {
+// URLRouter handles creation & redirects
+func URLRouter() http.Handler {
 	fmt.Println("Url router is running")
 	r := chi.NewRouter()
 
-	r.Get("/{id}", getUrl)
-	r.Post("/", postUrl)
+	r.Get("/{id}", GetURL)
+	r.Post("/", PostURL)
 
 	return r
 }
 
-type Goly struct {
+type goly struct {
 	ID     string `json:"id" bson:"_id"`
-	Url    string `json:"url" bson:"url"`
+	URL    string `json:"url" bson:"url"`
 	Clicks int    `json:"clicks" bson:"clicks"`
 }
 
-// Redirects to original url
-func getUrl(w http.ResponseWriter, r *http.Request) {
+// GetURL redirects to original url
+func GetURL(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	url, err := rdb.Get(ctx, id).Result()
 
@@ -103,15 +104,15 @@ func findAndCache(id string) (string, error) {
 	return goly["url"], nil
 }
 
-// Creates a shortened url & saves it to redis
-func postUrl(w http.ResponseWriter, r *http.Request) {
+// PostURL Creates a shortened url & saves it to redis
+func PostURL(w http.ResponseWriter, r *http.Request) {
 	body, err := verifyPostBody(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = CacheAndSave(body)
+	err = cacheAndSave(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -128,15 +129,15 @@ func postUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 // Verifies request data is valid
-func verifyPostBody(data io.Reader) (Goly, error) {
-	var body Goly
+func verifyPostBody(data io.Reader) (goly, error) {
+	var body goly
 	err := json.NewDecoder(data).Decode(&body)
 	if err != nil {
-		return Goly{}, errors.New("error: unable to parse json")
+		return goly{}, errors.New("error: unable to parse json")
 	}
 
-	if body.Url == "" {
-		return Goly{}, errors.New("error: missing field url")
+	if body.URL == "" {
+		return goly{}, errors.New("error: missing field url")
 	}
 
 	body.ID = generateID()
@@ -159,12 +160,12 @@ func generateID() string {
 	return id
 }
 
-func CacheAndSave(g Goly) error {
+func cacheAndSave(g goly) error {
 	const errAmount int8 = 2
 	c := make(chan error, errAmount)
 
 	go func() {
-		err := cache(g.ID, g.Url)
+		err := cache(g.ID, g.URL)
 		c <- err
 	}()
 
@@ -190,7 +191,7 @@ func cache(id string, url string) error {
 	return nil
 }
 
-func save(g Goly, c chan<- error) {
+func save(g goly, c chan<- error) {
 	_, err := col.InsertOne(ctx, g)
 	if err != nil {
 		c <- errors.New("error: something went wrong saving")
