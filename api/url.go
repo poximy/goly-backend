@@ -148,12 +148,13 @@ func verifyPostBody(data io.Reader) (goly, error) {
 
 func generateID() string {
 	var id string
+	const idLength int = 6
+	const choiceLength int = len(choice)
 
-	length := len(choice)
 	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < 6; i++ {
-		char := choice[rand.Intn(length)]
+	for i := 0; i < idLength; i++ {
+		char := choice[rand.Intn(choiceLength)]
 		id += string(char)
 	}
 
