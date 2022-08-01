@@ -1,4 +1,4 @@
-module github.com/poximy/url-shortener-backend
+module github.com/poximy/goly-backend
 
 // +heroku goVersion go1.17
 go 1.18
