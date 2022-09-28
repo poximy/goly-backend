@@ -30,8 +30,8 @@ response:
 
 ```json
 {
-  "id":"123456",
-  "url":"https://goly.vercel.app"
-  "clicks":0
+  "id": "123456",
+  "url": "https://goly.vercel.app",
+  "clicks": 0
 }
 ```
