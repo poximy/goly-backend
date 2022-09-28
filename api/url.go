@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/poximy/url-shortener-backend/database"
+	"github.com/poximy/goly-backend/database"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"

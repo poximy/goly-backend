@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/poximy/url-shortener-backend/api"
+	"github.com/poximy/goly-backend/api"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
