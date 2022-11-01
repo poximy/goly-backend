@@ -2,7 +2,7 @@
 
 Goly is inspired by [`bit.ly`](https://bitly.com/)
 
-Web app is live at [goly.vercel.app](https://goly.vercel.app)
+Web app is live at [goly.poximy.com](https://goly.poximy.com)
 
 Built with `.go` and [`chi`](https://github.com/go-chi/chi)
 
